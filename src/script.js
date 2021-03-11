@@ -5,6 +5,8 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import * as dat from 'dat.gui'
 
+// import myModel from '/models/model.glb'
+
 /**
  * Base
  */
@@ -36,16 +38,14 @@ gltfLoader.load(
         gltf.scene.scale.set(3, 3, 3)
 
         scene.add(gltf.scene)
-        console.log(gltf)
 
         updateAllMaterials()
 
-        gltf.scene.children[2].visible = false
-        gui.add(gltf.scene.children[2], 'visible').name('mouth')
+        gltf.scene.children[3].visible = false
+        gui.add(gltf.scene.children[3], 'visible').name('mouth')
         // gui.add(gltf.scene.rotation, 'y').min(-0.5).max(0.5).step(0.001).name('rotateY')
         // gui.add(gltf.scene.rotation, 'x').min(-0.5).max(0.5).step(0.001).name('rotateX')
         // gui.add(gltf.scene.rotation, 'z').min(-0.5).max(0.5).step(0.001).name('rotateZ')
-        console.log(gltf.scene)
         model = gltf.scene
         cylinder = gltf.scene.children[0]
     }
@@ -165,7 +165,6 @@ const tick = () =>
         raycaster.setFromCamera(mouse, camera)
         const ray = raycaster.ray.direction
         const intersects = raycaster.intersectObjects([cylinder])
-        console.log(intersects)
 
         const lookPoint = camera.position.clone()
                                          .add( ray.normalize().multiplyScalar( 10 ) )
