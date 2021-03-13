@@ -16,6 +16,7 @@
     "copy-webpack-plugin": "^7.0.0",
     "css-loader": "^5.1.0",
     "dat.gui": "^0.7.7",
+    "face-api.js": "^0.22.2",
     "file-loader": "^6.2.0",
     "html-loader": "^2.1.1",
     "html-webpack-plugin": "^5.2.0",

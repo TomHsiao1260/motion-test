@@ -5,7 +5,13 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import * as dat from 'dat.gui'
 
-// import myModel from '/models/model.glb'
+import startDraw from './face'
+import data from './results.json'
+
+let currentImg = 0
+let rotation = null
+
+rotation = startDraw(data, currentImg)
 
 /**
  * Base
@@ -22,17 +28,19 @@ const scene = new THREE.Scene()
 /**
  * Models
  */
-const dracoLoader = new DRACOLoader()
-dracoLoader.setDecoderPath('/draco/')
+// const dracoLoader = new DRACOLoader()
+// dracoLoader.setDecoderPath('/draco/')
+// dracoLoader.setDecoderPath('https://tomhsiao1260.github.io/motion-test/draco/')
 
 const gltfLoader = new GLTFLoader()
-gltfLoader.setDRACOLoader(dracoLoader)
+// gltfLoader.setDRACOLoader(dracoLoader)
 
 let model = null
 let cylinder = null
 
 gltfLoader.load(
     '/models/model.glb',
+    // 'https://tomhsiao1260.github.io/motion-test/models/model.glb',
     (gltf) =>
     {
         gltf.scene.scale.set(3, 3, 3)
@@ -41,13 +49,7 @@ gltfLoader.load(
 
         updateAllMaterials()
 
-        gltf.scene.children[3].visible = false
-        gui.add(gltf.scene.children[3], 'visible').name('mouth')
-        // gui.add(gltf.scene.rotation, 'y').min(-0.5).max(0.5).step(0.001).name('rotateY')
-        // gui.add(gltf.scene.rotation, 'x').min(-0.5).max(0.5).step(0.001).name('rotateX')
-        // gui.add(gltf.scene.rotation, 'z').min(-0.5).max(0.5).step(0.001).name('rotateZ')
         model = gltf.scene
-        cylinder = gltf.scene.children[0]
     }
 )
 
@@ -57,6 +59,13 @@ const updateAllMaterials = () => {
         {
             child.material.envMap = environmentMap
             child.material.envMapIntensity = 0.7
+
+            if (child.name === 'mouth') {
+                child.visible = false
+                gui.add(child, 'visible').name('mouth')
+            }
+
+            if (child.name === 'Cylinder') cylinder = child
         }
     })
 }
@@ -72,6 +81,21 @@ window.addEventListener('touchmove', (event) => {
     mouse.x = event.touches[0].clientX / sizes.width * 2 - 1
     mouse.y = - (event.touches[0].clientY / sizes.height) * 2 + 1
 })
+
+window.addEventListener("keypress", (e) => {
+    if (e.code === 'Space') {
+        rotation = startDraw(data, currentImg)
+        
+        if (currentImg >= data.landmarks.length - 1) {
+            currentImg = 0
+        } else {
+            currentImg ++
+        }
+
+        mouse.x = rotation.mX
+        mouse.y = rotation.mY
+    }
+});
 
 /**
  * Lights
@@ -91,6 +115,12 @@ const environmentMap = cubeTextureLoader.load([
     '/textures/environmentMaps/0/ny.jpg',
     '/textures/environmentMaps/0/pz.jpg',
     '/textures/environmentMaps/0/nz.jpg',
+    // 'https://tomhsiao1260.github.io/motion-test/textures/environmentMaps/0/px.jpg',
+    // 'https://tomhsiao1260.github.io/motion-test/textures/environmentMaps/0/nx.jpg',
+    // 'https://tomhsiao1260.github.io/motion-test/textures/environmentMaps/0/py.jpg',
+    // 'https://tomhsiao1260.github.io/motion-test/textures/environmentMaps/0/ny.jpg',
+    // 'https://tomhsiao1260.github.io/motion-test/textures/environmentMaps/0/pz.jpg',
+    // 'https://tomhsiao1260.github.io/motion-test/textures/environmentMaps/0/nz.jpg',
 ])
 scene.background = environmentMap
 
@@ -123,12 +153,13 @@ window.addEventListener('resize', () =>
 // Base camera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
 camera.position.set(0, -3, -15)
+camera.lookAt(new THREE.Vector3())
 scene.add(camera)
 
 // Controls
-const controls = new OrbitControls(camera, canvas)
-controls.target.set(0, 1, 0)
-controls.enableDamping = true
+// const controls = new OrbitControls(camera, canvas)
+// controls.target.set(0, 1, 0)
+// controls.enableDamping = true
 
 /**
  * Renderer
@@ -152,7 +183,6 @@ environmentMap.encoding = THREE.sRGBEncoding
 const clock = new THREE.Clock()
 let previousTime = 0
 
-
 const tick = () =>
 {
     const elapsedTime = clock.getElapsedTime()
@@ -169,11 +199,12 @@ const tick = () =>
         const lookPoint = camera.position.clone()
                                          .add( ray.normalize().multiplyScalar( 10 ) )
         model.lookAt(lookPoint)
+        if (rotation) model.rotation.z -= rotation.rZ
     }
 
 
     // Update controls
-    controls.update()
+    // controls.update()
 
     // Render
     renderer.render(scene, camera)

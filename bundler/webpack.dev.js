@@ -14,16 +14,16 @@ module.exports = merge(
         mode: 'development',
         devServer:
         {
-            host: '0.0.0.0',
+            // host: '0.0.0.0',
             port: portFinderSync.getPort(8080),
             contentBase: './dist',
-            watchContentBase: true,
+            // watchContentBase: true,
             open: true,
-            https: false,
-            useLocalIp: true,
-            disableHostCheck: true,
-            overlay: true,
-            noInfo: true,
+            // https: false,
+            // useLocalIp: false,
+            // disableHostCheck: true,
+            // overlay: true,
+            // noInfo: true,
             after: function(app, server, compiler)
             {
                 const port = server.options.port
