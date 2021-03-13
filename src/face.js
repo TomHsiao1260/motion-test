@@ -1,14 +1,26 @@
 import * as faceapi from 'face-api.js'
+// import data from './results.json'
 // https://github.com/WebDevSimplified/Face-Detection-JavaScript
 
-// Promise.all([
-//   faceapi.nets.tinyFaceDetector.loadFromUri('/ml-models'),
-//   faceapi.nets.faceLandmark68Net.loadFromUri('/ml-models'),
-//   faceapi.nets.faceRecognitionNet.loadFromUri('/ml-models'),
-//   faceapi.nets.faceExpressionNet.loadFromUri('/ml-models')
-// ]).then(startVideo)
+export const data = {
+  landmarks: [],
+  date: []
+}
+
+Promise.all([
+  faceapi.nets.tinyFaceDetector.loadFromUri('/ml-models'),
+  faceapi.nets.faceLandmark68Net.loadFromUri('/ml-models'),
+  faceapi.nets.faceRecognitionNet.loadFromUri('/ml-models'),
+  faceapi.nets.faceExpressionNet.loadFromUri('/ml-models')
+]).then(startVideo)
 
 const video = document.getElementById('video')
+
+function startVideo() {
+  navigator.mediaDevices.getUserMedia({ video: {} })
+                        .then(stream => video.srcObject = stream )
+                        .catch(err => console.error(err) )
+}
 
 function getSize(domElement) {
   const style = window.getComputedStyle(domElement)
@@ -17,17 +29,6 @@ function getSize(domElement) {
   const width = parseInt(strWidth.split('px')[0])
   const height = parseInt(strHeight.split('px')[0])
   return { width, height }
-}
-
-function startVideo() {
-  navigator.mediaDevices.getUserMedia({ video: {} })
-                        .then(stream => video.srcObject = stream )
-                        .catch(err => console.error(err) )
-  // navigator.getUserMedia(
-  //   { video: {} },
-  //   stream => video.srcObject = stream,
-  //   err => console.error(err)
-  // )
 }
 
 const resultArray = []
@@ -55,6 +56,7 @@ video.addEventListener('play', () => {
       faceapi.draw.drawFaceLandmarks(canvas, resizedDetections)
 
       const dateNow = Date.now() - dateStart
+      
       if (detections[0].hasOwnProperty('landmarks')) {
         resultArray.push(detections[0].landmarks)
         dateArray.push(dateNow)
@@ -62,12 +64,11 @@ video.addEventListener('play', () => {
 
       if (dateNow > 10000 && enable) {
         clearInterval(timer);
-        const data = {
-          landmarks: resultArray,
-          date: dateArray
-        }
+        data.landmarks = resultArray
+        data.date = dateArray
+
         const results = JSON.stringify(data);
-        download(results, 'results.json', 'application/json');
+        // download(results, 'results.json', 'application/json');
 
         canvas.getContext('2d').clearRect(0, 0, width, height) 
         enable = false
@@ -75,6 +76,8 @@ video.addEventListener('play', () => {
         const tracks = video.srcObject.getTracks()
         tracks.forEach(track => track.stop())
         video.srcObject = null
+
+        plot(data, 0)
       }
     }
   }, 100)
@@ -98,7 +101,7 @@ function download(data, filename, type) {
     }
 }
 
-export default function startDraw(data, imgNum) {
+export default function startDraw(imgNum) {
   const rotate = plot(data, imgNum)
   return rotate
 }
@@ -154,13 +157,13 @@ function plot(data, imgNum) {
   const rZ = Math.atan(slopZ)
 
   ctx.beginPath()
-  ctx.arc((1 + mX) * width / 2, (1 - mY) * height / 2, 10, 0, 2 * Math.PI)
-  ctx.fillStyle = 'red'
+  ctx.arc((1 + mX) * width / 2, (1 - mY) * height / 2, 6, 0, 2 * Math.PI)
+  ctx.fillStyle = 'blue'
   ctx.fill()
   ctx.beginPath()
   ctx.moveTo((1 + mX) * width / 2, (1 - mY) * height / 2)
   ctx.lineTo((1 + mX) * width / 2 + 30, (1 - mY) * height / 2 + 30 * slopZ)
-  ctx.fillStyle = 'blue'
+  ctx.fillStyle = 'red'
   ctx.stroke()
 
   return {mX, mY, rZ}

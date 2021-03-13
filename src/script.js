@@ -2,16 +2,14 @@ import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
-import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import * as dat from 'dat.gui'
+import gsap from 'gsap'
 
 import startDraw from './face'
-import data from './results.json'
+import { data } from './face'
 
 let currentImg = 0
 let rotation = null
-
-rotation = startDraw(data, currentImg)
 
 /**
  * Base
@@ -28,12 +26,7 @@ const scene = new THREE.Scene()
 /**
  * Models
  */
-// const dracoLoader = new DRACOLoader()
-// dracoLoader.setDecoderPath('/draco/')
-// dracoLoader.setDecoderPath('https://tomhsiao1260.github.io/motion-test/draco/')
-
 const gltfLoader = new GLTFLoader()
-// gltfLoader.setDRACOLoader(dracoLoader)
 
 let model = null
 let cylinder = null
@@ -84,7 +77,7 @@ window.addEventListener('touchmove', (event) => {
 
 window.addEventListener("keypress", (e) => {
     if (e.code === 'Space') {
-        rotation = startDraw(data, currentImg)
+        rotation = startDraw(currentImg)
         
         if (currentImg >= data.landmarks.length - 1) {
             currentImg = 0
@@ -189,7 +182,7 @@ const tick = () =>
     const deltaTime = elapsedTime - previousTime
     previousTime = elapsedTime
 
-    if(model)
+    if (model)
     {
         const raycaster = new THREE.Raycaster()
         raycaster.setFromCamera(mouse, camera)
@@ -201,7 +194,6 @@ const tick = () =>
         model.lookAt(lookPoint)
         if (rotation) model.rotation.z -= rotation.rZ
     }
-
 
     // Update controls
     // controls.update()
