@@ -4,7 +4,7 @@ const MiniCSSExtractPlugin = require('mini-css-extract-plugin')
 const path = require('path')
 
 module.exports = {
-    entry: path.resolve(__dirname, '../src/script.js'),
+    entry: path.resolve(__dirname, '../src/index.js'),
     output:
     {
         filename: 'bundle.[contenthash].js',
@@ -24,6 +24,11 @@ module.exports = {
         }),
         new MiniCSSExtractPlugin()
     ],
+    resolve: {
+        fallback: {
+          fs: false
+        }
+    },
     module:
     {
         rules:
@@ -64,6 +69,21 @@ module.exports = {
                         options:
                         {
                             outputPath: 'assets/images/'
+                        }
+                    }
+                ]
+            },
+
+            // Models
+            {
+                test: /\.(glb|gltf|fbx|obj)$/,
+                use:
+                [
+                    {
+                        loader: 'file-loader',
+                        options:
+                        {
+                            outputPath: 'assets/models/'
                         }
                     }
                 ]
